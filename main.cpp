@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 using namespace std;
-bool acc_created=false;
 struct acc
     {
         string name;
@@ -11,6 +10,8 @@ struct acc
 
     };
 acc details;
+acc accounts[100];
+int acc_ct=0;
 void create_acc(){
     cout<<"Enter the name of the account holder:- ";
     cin>>details.name;
@@ -19,19 +20,20 @@ void create_acc(){
     cout<<"Enter the account type:- ";
     cin>>details.acc_type;
     cout<<"Enter the balance:- ";
-    cin>>details.balance;
-    cout<<"Account created successfully"<<endl;  
-    acc_created=true;  
+    cin>>details.balance;  
+    accounts[acc_ct]=details;
+    cout<<"Account created successfully"<<endl;
+    acc_ct+=1;
 }
 void deposit(){
     float dep_amt;
-    if (acc_created){
+    if (acc_ct!=0){
         cout<<"Enter the amount You want to deposit:- ";
         cin>>dep_amt;
         if (dep_amt>0){
-            details.balance=details.balance+dep_amt;
+            accounts[acc_ct-1].balance=accounts[acc_ct-1].balance+dep_amt;
             cout<<"Money Deposited"<<endl;
-            cout<<"New Balance:- "<<details.balance<<endl;
+            cout<<"New Balance:- "<<accounts[acc_ct-1].balance<<endl;
         }
         else{
             cout<<"Invalid Amount"<<endl;
@@ -43,14 +45,14 @@ void deposit(){
 }
 void withdraw(){
     int wtd_amt;
-    if (acc_created){
+    if (acc_ct!=0){
         cout<<"Enter the amount you want to withdraw:- ";
         cin>>wtd_amt;
         if (wtd_amt>0){
-            if (wtd_amt<=details.balance){  
-                details.balance=details.balance-wtd_amt;
+            if (wtd_amt<=accounts[acc_ct-1].balance){  
+                accounts[acc_ct-1].balance=accounts[acc_ct-1].balance-wtd_amt;
                 cout<<"Money withdrawn successfully"<<endl;
-                cout<<"New Balance:- "<<details.balance<<endl;
+                cout<<"New Balance:- "<<accounts[acc_ct-1].balance<<endl;
             }
             else{
                 cout<<"Insufficient balance"<<endl;
@@ -66,9 +68,9 @@ void withdraw(){
     }
 }
 void chk_balance(){
-    if (acc_created)
+    if (acc_ct!=0)
     {
-        cout<<"Current Balance:- "<<details.balance<<endl;
+        cout<<"Current Balance:- "<<accounts[acc_ct-1].balance<<endl;
     }
     else
     {
@@ -76,12 +78,12 @@ void chk_balance(){
     }
 }
 void acc_details(){
-    if (acc_created==true){
+    if (acc_ct!=0){
     cout<<"===========================================    ACCOUNT DETAILS     ==========================================\n";
-    cout<<"Account Holder:- " <<details.name<<endl;
-    cout<<"Account Number:- "<<details.acc_number<<endl;
-    cout<<"Account Type:-"<<details.acc_type<<endl;
-    cout<<"Balance:- "<<details.balance<<endl;
+    cout<<"Account Holder:- " <<accounts[acc_ct-1].name<<endl;
+    cout<<"Account Number:- "<<accounts[acc_ct-1].acc_number<<endl;
+    cout<<"Account Type:-"<<accounts[acc_ct-1].acc_type<<endl;
+    cout<<"Balance:- "<<accounts[acc_ct-1].balance<<endl;
     cout<<"==============================================================================================================\n";
     }
     else{
