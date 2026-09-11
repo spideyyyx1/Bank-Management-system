@@ -12,18 +12,85 @@ struct acc
 acc details;
 acc accounts[100];
 int acc_ct=0;
+int get_acc_seq(int branch_code){
+    string qry="python account_seq.py "+to_string(branch_code);
+    FILE* pipe=_popen(qry.c_str(),"r");
+    char buffer[100];
+    fgets(buffer,sizeof(buffer),pipe);
+    string result=buffer;
+    _pclose(pipe);
+    return stoi(result);
+}
+string gen_acc_num(int branch_code,int seq){
+    string acc_num="AXB"+to_string(branch_code);
+    int s=to_string(seq).length();
+    for (int i=0;i<5-s;i++){
+        acc_num+="0";
+    }
+    acc_num+=to_string(seq);
+    return acc_num;
+}
+int get_branch_code(string branchname){
+    string qry="python branch_lookup.py "+branchname;
+    FILE* pipe=_popen(qry.c_str(),"r");
+    char buffer[100];
+    fgets(buffer,sizeof(buffer),pipe);
+    string result=buffer;
+    if (result=="0\n")
+    {
+        _pclose(pipe);
+        return 0;
+    }
+    else
+    {
+        int num=stoi(result);   
+        _pclose(pipe);
+        return num;
+    }
+}
+int save_acc(string acc_no,string name,int branch_code,string acc_type,float bal){
+    string qry="python save_acc.py "+acc_no+" "+name+" "+to_string(branch_code)+" "+acc_type+" "+to_string(bal);
+    FILE* pipe=_popen(qry.c_str(),"r");
+    char buffer[100];
+    fgets(buffer,sizeof(buffer),pipe);
+    string result=buffer;
+    _pclose(pipe);
+    return stoi(result);
+}
 void create_acc(){
     cout<<"Enter the name of the account holder:- ";
     cin>>details.name;
-    cout<<"Enter the account number:- ";
-    cin>>details.acc_number;
+    cout<<"Enter the branch name:- ";
+    string branch_name;
+    cin>>branch_name;
+    int b_code=get_branch_code(branch_name);
+    if(b_code==0){
+        cout<<"Branch Not Found ! ! !"<<endl;
+        return;
+    }
     cout<<"Enter the account type:- ";
     cin>>details.acc_type;
     cout<<"Enter the balance:- ";
-    cin>>details.balance;  
-    accounts[acc_ct]=details;
-    cout<<"Account created successfully"<<endl;
-    acc_ct+=1;
+    cin>>details.balance;
+    int sequ=get_acc_seq(b_code);
+    string acc_no=gen_acc_num(b_code,sequ);
+    details.acc_number=acc_no;
+    int result=save_acc(
+        acc_no,
+        details.name,
+        b_code,
+        details.acc_type,
+        details.balance
+    );
+    if(result==1){
+        accounts[acc_ct]=details;
+        cout<<"Account created successfully!"<<endl;
+        cout<<"Your account number is: "<<acc_no<<endl;
+        acc_ct+=1;
+    }
+    else{
+        cout<<"Account creation failed!"<<endl;
+    }
 }
 void deposit(){
     float dep_amt;
@@ -90,10 +157,10 @@ void acc_details(){
         cout<<"Please Create a Account First ! ! !"<<endl;
     }
 }
+
 int main()
 {   
     bool x=true;
-    
     int choice;
     cout<<"==========================================\n     WELCOME TO BANK MANAGEMENT SYSTEM    \n==========================================\n";
     while (x){
